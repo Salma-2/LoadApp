@@ -56,7 +56,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun download(URL: String) {
         val request =
             DownloadManager.Request(Uri.parse(URL))
