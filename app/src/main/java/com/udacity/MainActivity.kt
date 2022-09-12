@@ -9,6 +9,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import kotlinx.android.synthetic.main.activity_main.*
@@ -30,8 +32,21 @@ class MainActivity : AppCompatActivity() {
 
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
+        rb_group.setOnCheckedChangeListener { _, id ->
+            when (id) {
+                R.id.retrofit_rb -> URL = RETROFIT_URL
+                R.id.udacity_rb -> URL = UDACITY_URL
+                R.id.glide_rb -> URL = GLIDE_URL
+            }
+        }
+
         custom_button.setOnClickListener {
-            download()
+            if (URL != "") {
+                Log.d(TAG, "url is -> $URL")
+                download(URL)
+            } else {
+                Toast.makeText(this, getString(R.string.alert_toast), Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -41,7 +56,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun download() {
+
+    private fun download(URL: String) {
         val request =
             DownloadManager.Request(Uri.parse(URL))
                 .setTitle(getString(R.string.app_name))
@@ -56,9 +72,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val URL =
-            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
+        private const val GLIDE_URL = "https://github.com/bumptech/glide"
+        private const val RETROFIT_URL = "https://github.com/square/retrofit"
+        private const val UDACITY_URL =
+            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter"
+        private var URL = ""
         private const val CHANNEL_ID = "channelId"
+        private const val TAG = "MainActivity"
     }
 
 }
