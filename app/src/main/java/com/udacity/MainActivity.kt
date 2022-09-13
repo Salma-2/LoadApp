@@ -64,6 +64,7 @@ class MainActivity : AppCompatActivity() {
                 download(url)
             } else {
                 Toast.makeText(this, getString(R.string.alert_toast), Toast.LENGTH_SHORT).show()
+                custom_button.downloadCompleted()
             }
         }
     }
@@ -80,6 +81,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getDownloadStatus(id: Long, context: Context, intent: Intent?) {
         if (intent?.action == DownloadManager.ACTION_DOWNLOAD_COMPLETE) {
+            custom_button.downloadCompleted()
             val query = DownloadManager.Query()
             val downloadManager =
                 context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
@@ -99,7 +101,6 @@ class MainActivity : AppCompatActivity() {
                             cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_REASON))
                         Log.d(TAG, "Error while downloading $message")
                         notificationManager.sendNotification(context, url, getString(R.string.fail))
-
                     }
                 }
             }
