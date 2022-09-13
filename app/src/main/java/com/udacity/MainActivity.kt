@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -53,7 +54,34 @@ class MainActivity : AppCompatActivity() {
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+            Log.d(TAG, "onReceive -> DownloadId = $id")
+
+            getDownloadStatus(id!!, context, intent)
         }
+    }
+
+    private fun getDownloadStatus(id: Long, context: Context?, intent: Intent?) {
+        if (intent?.action == DownloadManager.ACTION_DOWNLOAD_COMPLETE) {
+            val query = DownloadManager.Query()
+            val downloadManager =
+                context?.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            query.setFilterById(id)
+            val cursor = downloadManager.query(query)
+            if (cursor.moveToFirst()) {
+                if (cursor.count > 0) {
+                    val status =
+                        cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
+                    if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                        Log.d(TAG, "File is downloaded successfully")
+                    } else {
+                        val message =
+                            cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_REASON))
+                        Log.d(TAG, "Error while downloading $message")
+                    }
+                }
+            }
+        }
+
     }
 
     private fun download(URL: String) {
@@ -64,17 +92,20 @@ class MainActivity : AppCompatActivity() {
                 .setRequiresCharging(false)
                 .setAllowedOverMetered(true)
                 .setAllowedOverRoaming(true)
+                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "code.zip")
+
 
         val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         downloadID =
             downloadManager.enqueue(request)// enqueue puts the download request in the queue.
+        Log.d(TAG, "Download Id = $downloadID")
     }
 
     companion object {
-        private const val GLIDE_URL = "https://github.com/bumptech/glide"
-        private const val RETROFIT_URL = "https://github.com/square/retrofit"
+        private const val GLIDE_URL = "https://github.com/bumptech/glide.git"
+        private const val RETROFIT_URL = "https://github.com/square/retrofit.git"
         private const val UDACITY_URL =
-            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter"
+            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter.git"
         private var URL = ""
         private const val CHANNEL_ID = "channelId"
         private const val TAG = "MainActivity"
