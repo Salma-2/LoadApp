@@ -19,6 +19,9 @@
 
     <string name="alert_toast">Please select the file to download</string>
 
+    <string name="channel_id">download_complete_channel</string>
+    <string name="channel_name">Download Complete</string>
+    <string name="channel_decription">Download Complete</string>
 
 
 </resources>

@@ -1,19 +1,23 @@
 package com.udacity
 
 import android.app.DownloadManager
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 
@@ -30,7 +34,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-
+        createChannel(getString(R.string.channel_id),
+            getString(R.string.channel_name),
+            getString(R.string.channel_decription))
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
         rb_group.setOnCheckedChangeListener { _, id ->
@@ -52,19 +58,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
+        override fun onReceive(context: Context, intent: Intent?) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
             Log.d(TAG, "onReceive -> DownloadId = $id")
 
             getDownloadStatus(id!!, context, intent)
+
         }
     }
 
-    private fun getDownloadStatus(id: Long, context: Context?, intent: Intent?) {
+    private fun getDownloadStatus(id: Long, context: Context, intent: Intent?) {
+        val notificationManager =
+            ContextCompat.getSystemService(context,
+                NotificationManager::class.java) as NotificationManager
+
         if (intent?.action == DownloadManager.ACTION_DOWNLOAD_COMPLETE) {
             val query = DownloadManager.Query()
             val downloadManager =
-                context?.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             query.setFilterById(id)
             val cursor = downloadManager.query(query)
             if (cursor.moveToFirst()) {
@@ -73,10 +84,13 @@ class MainActivity : AppCompatActivity() {
                         cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
                     if (status == DownloadManager.STATUS_SUCCESSFUL) {
                         Log.d(TAG, "File is downloaded successfully")
+                        notificationManager.sendNotification(context)
                     } else {
                         val message =
                             cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_REASON))
                         Log.d(TAG, "Error while downloading $message")
+                        notificationManager.sendNotification(context)
+
                     }
                 }
             }
@@ -101,13 +115,32 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "Download Id = $downloadID")
     }
 
+    private fun createChannel(channelId: String, channelName: String, channelDescription: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                enableLights(true)
+                lightColor = Color.RED
+                enableVibration(true)
+                description = channelDescription
+                setShowBadge(false)
+            }
+            val notificationManager = getSystemService(
+                NotificationManager::class.java
+            )
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
+    }
+
     companion object {
         private const val GLIDE_URL = "https://github.com/bumptech/glide.git"
         private const val RETROFIT_URL = "https://github.com/square/retrofit.git"
         private const val UDACITY_URL =
             "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter.git"
         private var URL = ""
-        private const val CHANNEL_ID = "channelId"
         private const val TAG = "MainActivity"
     }
 
