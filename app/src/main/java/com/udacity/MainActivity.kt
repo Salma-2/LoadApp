@@ -18,6 +18,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import com.udacity.Constants.GLIDE_URL
+import com.udacity.Constants.RETROFIT_URL
+import com.udacity.Constants.UDACITY_URL
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 
@@ -25,7 +28,7 @@ import kotlinx.android.synthetic.main.content_main.*
 class MainActivity : AppCompatActivity() {
 
     private var downloadID: Long = 0
-
+    private var url = ""
     private lateinit var notificationManager: NotificationManager
     private lateinit var pendingIntent: PendingIntent
     private lateinit var action: NotificationCompat.Action
@@ -49,16 +52,16 @@ class MainActivity : AppCompatActivity() {
 
         rb_group.setOnCheckedChangeListener { _, id ->
             when (id) {
-                R.id.retrofit_rb -> URL = RETROFIT_URL
-                R.id.udacity_rb -> URL = UDACITY_URL
-                R.id.glide_rb -> URL = GLIDE_URL
+                R.id.retrofit_rb -> url = RETROFIT_URL
+                R.id.udacity_rb -> url = UDACITY_URL
+                R.id.glide_rb -> url = GLIDE_URL
             }
         }
 
         custom_button.setOnClickListener {
-            if (URL != "") {
-                Log.d(TAG, "url is -> $URL")
-                download(URL)
+            if (url != "") {
+                Log.d(TAG, "url is -> $url")
+                download(url)
             } else {
                 Toast.makeText(this, getString(R.string.alert_toast), Toast.LENGTH_SHORT).show()
             }
@@ -88,12 +91,14 @@ class MainActivity : AppCompatActivity() {
                         cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
                     if (status == DownloadManager.STATUS_SUCCESSFUL) {
                         Log.d(TAG, "File is downloaded successfully")
-                        notificationManager.sendNotification(context, URL, "Success")
+                        notificationManager.sendNotification(context,
+                            url,
+                            getString(R.string.success))
                     } else {
                         val message =
                             cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_REASON))
                         Log.d(TAG, "Error while downloading $message")
-                        notificationManager.sendNotification(context, URL, "Failed")
+                        notificationManager.sendNotification(context, url, getString(R.string.fail))
 
                     }
                 }
@@ -139,11 +144,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val GLIDE_URL = "https://github.com/bumptech/glide.git"
-        private const val RETROFIT_URL = "https://github.com/square/retrofit.git"
-        private const val UDACITY_URL =
-            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter.git"
-        private var URL = ""
         private const val TAG = "MainActivity"
     }
 

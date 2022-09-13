@@ -5,16 +5,17 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
+import com.udacity.Constants.URL
+import com.udacity.Constants.STATUS
 
 private const val NOTIFICATION_ID = 0
 
-private const val FILE_NAME = "FILENAME"
-private const val STATUS = "STATUS"
+
 
 fun NotificationManager.sendNotification(appContext: Context, filename: String, status: String) {
     // create intent
     val detailIntent = Intent(appContext, DetailActivity::class.java)
-    detailIntent.putExtra(FILE_NAME, filename)
+    detailIntent.putExtra(URL, filename)
     detailIntent.putExtra(STATUS, status)
 
     // create PendingIntent

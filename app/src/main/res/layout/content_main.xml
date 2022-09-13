@@ -25,21 +25,21 @@
             style="@style/radioButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/glide_rb_label" />
+            android:text="@string/glide_filename" />
 
         <RadioButton
             android:id="@+id/udacity_rb"
             style="@style/radioButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/udacity_rb_label" />
+            android:text="@string/udacity_filename" />
 
         <RadioButton
             android:id="@+id/retrofit_rb"
             style="@style/radioButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/retrofit_rb_label" />
+            android:text="@string/retrofit_filename" />
     </RadioGroup>
 
     <com.udacity.LoadingButton
