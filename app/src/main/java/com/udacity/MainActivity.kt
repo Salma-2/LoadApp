@@ -34,10 +34,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+
+        notificationManager =
+            ContextCompat.getSystemService(this,
+                NotificationManager::class.java) as NotificationManager
+
         createChannel(getString(R.string.channel_id),
             getString(R.string.channel_name),
             getString(R.string.channel_decription))
+
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+
+
 
         rb_group.setOnCheckedChangeListener { _, id ->
             when (id) {
@@ -68,10 +76,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getDownloadStatus(id: Long, context: Context, intent: Intent?) {
-        val notificationManager =
-            ContextCompat.getSystemService(context,
-                NotificationManager::class.java) as NotificationManager
-
         if (intent?.action == DownloadManager.ACTION_DOWNLOAD_COMPLETE) {
             val query = DownloadManager.Query()
             val downloadManager =
@@ -84,12 +88,12 @@ class MainActivity : AppCompatActivity() {
                         cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
                     if (status == DownloadManager.STATUS_SUCCESSFUL) {
                         Log.d(TAG, "File is downloaded successfully")
-                        notificationManager.sendNotification(context)
+                        notificationManager.sendNotification(context, URL, "Success")
                     } else {
                         val message =
                             cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_REASON))
                         Log.d(TAG, "Error while downloading $message")
-                        notificationManager.sendNotification(context)
+                        notificationManager.sendNotification(context, URL, "Failed")
 
                     }
                 }
@@ -99,6 +103,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun download(URL: String) {
+        notificationManager.cancelAll()
         val request =
             DownloadManager.Request(Uri.parse(URL))
                 .setTitle(getString(R.string.app_name))
@@ -120,7 +125,7 @@ class MainActivity : AppCompatActivity() {
             val notificationChannel = NotificationChannel(
                 channelId,
                 channelName,
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 enableLights(true)
                 lightColor = Color.RED
@@ -128,9 +133,7 @@ class MainActivity : AppCompatActivity() {
                 description = channelDescription
                 setShowBadge(false)
             }
-            val notificationManager = getSystemService(
-                NotificationManager::class.java
-            )
+
             notificationManager.createNotificationChannel(notificationChannel)
         }
     }
