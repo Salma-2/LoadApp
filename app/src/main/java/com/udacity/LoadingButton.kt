@@ -4,8 +4,8 @@ import android.animation.AnimatorInflater
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
+import androidx.core.content.withStyledAttributes
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import kotlin.properties.Delegates
 
@@ -14,7 +14,6 @@ class LoadingButton @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
     private var widthSize = 0
     private var heightSize = 0
-
     private var progress = 0.0
 
     private val paint = Paint().apply {
@@ -45,8 +44,20 @@ class LoadingButton @JvmOverloads constructor(
         invalidate()
     }
 
+    var idleColor = 0
+    var txtColor = 0
+    var loadingColor = 0
+    var circleColor = 0
+
+
     init {
         isClickable = true
+        context.withStyledAttributes(attrs, R.styleable.LoadingButton) {
+            idleColor = getColor(R.styleable.LoadingButton_idleColor, 0)
+            txtColor = getColor(R.styleable.LoadingButton_txtColor, 0)
+            loadingColor = getColor(R.styleable.LoadingButton_loadingColor, 0)
+            circleColor = getColor(R.styleable.LoadingButton_circleColor, 0)
+        }
 
         valueAnimator = AnimatorInflater.loadAnimator(
             context,
@@ -57,14 +68,14 @@ class LoadingButton @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        paint.color = context.getColor(R.color.colorPrimary)
+        paint.color = idleColor
 
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
 
         if (buttonState == ButtonState.Loading) {
-            paint.color = resources.getColor(R.color.colorPrimaryDark)
+            paint.color = loadingColor
             canvas.drawRect(0f, 0f, width * (progress / 100).toFloat(), height.toFloat(), paint)
-            paint.color = resources.getColor(R.color.colorAccent)
+            paint.color = circleColor
             canvas.drawArc(rect, 0f, (360 * (progress / 100).toFloat()), true, paint)
         }
 
@@ -73,7 +84,7 @@ class LoadingButton @JvmOverloads constructor(
                 resources.getString(R.string.button_loading)
             else resources.getString(R.string.button_name)
 
-        paint.color = Color.WHITE
+        paint.color = txtColor
         canvas.drawText(buttonLabel,
             (width / 2).toFloat(),
             (height / 2 + 20).toFloat(),

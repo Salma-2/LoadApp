@@ -49,8 +49,13 @@
         android:layout_height="60dp"
         android:layout_margin="20dp"
         android:layout_marginBottom="32dp"
+        app:circleColor="@color/colorAccent"
+        app:idleColor="@color/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:loadingColor="@color/colorPrimaryDark"
+        app:txtColor="@color/white"
+        />
 
 </androidx.constraintlayout.motion.widget.MotionLayout>
